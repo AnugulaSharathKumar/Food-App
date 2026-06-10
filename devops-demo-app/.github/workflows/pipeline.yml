@@ -1,111 +1,40 @@
 name: DevSecOps Pipeline
-
-
 on:
-
  push:
-
   branches:
-
    - main
-
-
-
 jobs:
-
-
 build:
-
-
  runs-on: ubuntu-latest
-
-
-
  steps:
-
-
  - name: Checkout
-
    uses: actions/checkout@v4
-
-
-
  - name: Java Build
-
-
    run:
-
     mvn clean package
-
-
-
  - name: SonarQube Scan
-
-
    run:
-
-
     mvn sonar:sonar \
     -Dsonar.host.url=${{secrets.SONAR_URL}} \
     -Dsonar.token=${{secrets.SONAR_TOKEN}}
-
-
-
-
  - name: Docker Build
-
-
    run:
-
-
     docker build \
     -t demo-app .
-
-
-
-
  - name: Trivy Scan
-
-
    uses:
     aquasecurity/trivy-action@master
-
-
    with:
-
-
     image-ref: demo-app
-
-
-
-
  - name: Login GCP
-
-
    uses:
     google-github-actions/auth@v2
-
-
    with:
-
-
     credentials_json:
-
      ${{secrets.GCP_KEY}}
-
-
-
-
  - name: Push Image
-
-
    run:
-
-
     docker tag demo-app \
     us-central1-docker.pkg.dev/project/demo-images/demo-app
-
-
-
     docker push \
     us-central1-docker.pkg.dev/project/demo-images/demo-app
